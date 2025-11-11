@@ -19,7 +19,7 @@ async def index(request: Request):
 
 
 @app.post("/analyze", response_class=HTMLResponse)
-async def analyze(request: Request, topic: str = Form(...), source: str = Form("baidu"), fast: str = Form("off")):
+async def analyze(request: Request, topic: str = Form(...), source: str = Form("baidu"), fast: str = Form("on")):
     orchestrator = Orchestrator()
     fast_flag = fast.lower() in ("on", "true", "1", "yes")
     report = orchestrator.analyze(topic=topic, use_mock=False, source=source, fast=fast_flag)
