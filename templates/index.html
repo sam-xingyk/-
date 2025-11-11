@@ -9,7 +9,6 @@
 <body>
   <div class="container">
     <h1>微舆 POC</h1>
-    <p class="desc">输入一个分析主题，生成舆情报告（默认使用百度 AI 搜索；未配置时自动回退 RSS + Jina Reader）。</p>
 
     <form id="analyze-form" action="/analyze" method="post" class="card">
       <label for="topic">分析主题：</label>
@@ -19,7 +18,6 @@
     </form>
 
     <div class="tips">
-      <p>说明：已设置“默认百度 AI 搜索”。请在 .env 填写 BAIDU_APPBUILDER_API_KEY 后即可使用每日约100次免费额度；若未配置则自动回退到“RSS 发现 URL + Jina Reader 正文抽取”。当前默认启用“快速模式”（更快生成，正文抽取与超时更谨慎）。</p>
     </div>
   </div>
   <script>
