@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>报告 - {{ topic }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <a class="back" href="/">← 返回</a>
+    <h1>主题：{{ topic }}</h1>
+    <p class="desc">数据来源：RSS 发现 + Jina Reader（正文抽取） | 生成时间：{{ report.generated_at }} | 素材：{{ report.stats.item_count }}条 | 来源域名：{{ report.stats.domain_count }}个</p>
+    <section class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-title">有效文本样本</div>
+        <div class="kpi-value">≈{{ report.stats.item_count }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">总阅读量（近30天代理）</div>
+        <div class="kpi-value">≈{{ report.metrics.reads_total_proxy }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">总互动量（热榜匹配）</div>
+        <div class="kpi-value">≈{{ report.metrics.interactions_proxy }}</div>
+      </div>
+    </section>
+    <h2 class="subtitle">Report Engine - 智能报告生成</h2>
+    <ul class="tags">
+      <li>搜索量（近30天，中文维基）：{{ report.metrics.wiki_pageviews_zh if report.metrics.wiki_pageviews_zh is not none else 'N/A' }}</li>
+      <li>点赞量：{{ report.metrics.likes_estimate if report.metrics.likes_estimate is not none else 'N/A' }}</li>
+      <li>浏览量：{{ report.metrics.views_estimate if report.metrics.views_estimate is not none else 'N/A' }}</li>
+      <li>微博热搜匹配：{{ report.metrics.trending_counts.weibo }}</li>
+      <li>知乎热榜匹配：{{ report.metrics.trending_counts.zhihu }}</li>
+      <li>哔哩哔哩热榜匹配：{{ report.metrics.trending_counts.bilibili }}</li>
+      {% if report.metrics.platform_counts %}
+      <li>
+        平台素材命中：
+        {% for plat, cnt in report.metrics.platform_counts.items() %}
+          <span class="badge">{{ plat }} {{ cnt }}条</span>
+        {% endfor %}
+      </li>
+      {% endif %}
+    </ul>
+
+    <section class="card">
+      <h2>数据指标</h2>
+      <ul class="tags">
+        <li>维基浏览量（近30天，中文）：{{ report.metrics.wiki_pageviews_zh if report.metrics.wiki_pageviews_zh is not none else 'N/A' }}</li>
+        <li>维基浏览量（近30天，英文）：{{ report.metrics.wiki_pageviews_en if report.metrics.wiki_pageviews_en is not none else 'N/A' }}</li>
+        <li>RSS 命中条数：{{ report.metrics.rss_mentions_count }}</li>
+        {% if report.metrics.platform_counts %}
+        <li>
+          平台素材命中：
+          {% for plat, cnt in report.metrics.platform_counts.items() %}
+            <span class="badge">{{ plat }} {{ cnt }}条</span>
+          {% endfor %}
+        </li>
+        {% endif %}
+      </ul>
+      <div class="item">
+        <div class="item-title">平台热榜出现情况</div>
+        <div class="item-summary">
+          微博：{{ '出现' if report.metrics.trending_counts.weibo > 0 else '未出现' }}；
+          知乎：{{ '出现' if report.metrics.trending_counts.zhihu > 0 else '未出现' }}；
+          哔哩哔哩：{{ '出现' if report.metrics.trending_counts.bilibili > 0 else '未出现' }}；
+          新浪：{{ '出现' if report.metrics.trending_counts.sina > 0 else '未出现' }}；
+          今日头条：{{ '出现' if report.metrics.trending_counts.toutiao > 0 else '未出现' }}；
+          抖音：{{ '出现' if report.metrics.trending_counts.douyin > 0 else '未出现' }}；
+          小红书：{{ '出现' if report.metrics.trending_counts.xiaohongshu > 0 else '未出现' }}。
+        </div>
+        <div class="item-links">
+          {% if report.metrics.trending_agg.weibo_items %}
+          <div>
+            <strong>微博热榜匹配：</strong>
+            <ul class="tags">
+              {% for it in report.metrics.trending_agg.weibo_items %}
+              <li><a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if report.metrics.trending_agg.zhihu_items %}
+          <div>
+            <strong>知乎热榜匹配：</strong>
+            <ul class="tags">
+              {% for it in report.metrics.trending_agg.zhihu_items %}
+              <li><a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if report.metrics.trending_agg.bilibili_items %}
+          <div>
+            <strong>哔哩哔哩热榜匹配：</strong>
+            <ul class="tags">
+              {% for it in report.metrics.trending_agg.bilibili_items %}
+              <li><a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if report.metrics.trending_agg.sina_items %}
+          <div>
+            <strong>新浪热榜匹配：</strong>
+            <ul class="tags">
+              {% for it in report.metrics.trending_agg.sina_items %}
+              <li><a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if report.metrics.trending_agg.toutiao_items %}
+          <div>
+            <strong>今日头条热榜匹配：</strong>
+            <ul class="tags">
+              {% for it in report.metrics.trending_agg.toutiao_items %}
+              <li><a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if report.metrics.trending_agg.douyin_items %}
+          <div>
+            <strong>抖音热榜匹配：</strong>
+            <ul class="tags">
+              {% for it in report.metrics.trending_agg.douyin_items %}
+              <li><a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if report.metrics.trending_agg.xiaohongshu_items %}
+          <div>
+            <strong>小红书热榜匹配：</strong>
+            <ul class="tags">
+              {% for it in report.metrics.trending_agg.xiaohongshu_items %}
+              <li><a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>1.3 主要结论与战略启示</h2>
+      <p>{{ report.summary }}</p>
+      <div class="quote">在波动中，百年名校不是暂时停滞，而是一场永不停止的青春现场——你可以用任何姿势与它发生关系，它也用所有情绪回应你：骄傲给你超越，焦虑给你重塑，烟火气给你继续生活的理由。</div>
+    </section>
+
+    <section class="card">
+      <h2>2.0 品牌声量与影响力分析</h2>
+      <div class="grid">
+        <div>
+          <h3>2.1 整体声量趋势（近14天）</h3>
+          {% if report.metrics.timeseries_daily and report.metrics.timeseries_max_count %}
+          <div class="bar-chart">
+            {% set ts_max = report.metrics.timeseries_max_count %}
+            {% for pt in report.metrics.timeseries_daily %}
+              {% set pct = ((pt.count / ts_max) * 100) | round(0) %}
+              <div class="bar"><span class="bar-label">{{ pt.date }}</span><span class="bar-value">{{ pt.count }}</span><span class="bar-fill" data-pct="{{ pct }}"></span></div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="chart-placeholder">暂无时间序列数据。</div>
+          {% endif %}
+        </div>
+        <div>
+          <h3>2.2 来源域名分布（Top10）</h3>
+          <div class="bar-chart">
+            {% set maxc = report.metrics.domain_max_count %}
+            {% for dom, cnt in report.metrics.domain_counts.items() %}
+              {% set pct = ((cnt / maxc) * 100) | round(0) %}
+              <div class="bar"><span class="bar-label">{{ dom }}</span><span class="bar-value">{{ cnt }}</span><span class="bar-fill" data-pct="{{ pct }}"></span></div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>总体摘要</h2>
+      <p>{{ report.summary }}</p>
+    </section>
+
+    <section class="card">
+      <h2>关键词（Top10）</h2>
+      <ul class="tags">
+        {% for kw in report.keywords %}
+          <li>{{ kw.word }} <span class="count">x{{ kw.count }}</span></li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>情感/倾向</h2>
+      <p>
+        积极：{{ report.sentiment.positive }}；
+        消极：{{ report.sentiment.negative }}；
+        分值：{{ report.sentiment.score }}；
+        倾向：<strong>{{ report.sentiment.tendency }}</strong>
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>素材列表</h2>
+      <ul>
+        {% for it in report['items'] %}
+          <li>
+            <div class="item">
+              <div class="item-title">{{ it.title }}</div>
+              <div class="item-meta">来源：{{ it.source }} | 域名：{{ it.source_domain }} | 抓取：{{ it.fetch_time }}</div>
+              <div class="item-summary">
+                {% if it.content %}
+                  {{ it.content[:300] }}...
+                {% else %}
+                  {{ it.summary }}
+                {% endif %}
+              </div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>后续行动建议</h2>
+      <ol>
+        {% for a in report.actions %}
+          <li>{{ a }}</li>
+        {% endfor %}
+      </ol>
+    </section>
+  </div>
+  <div class="container" style="margin-top: 16px;">
+    <section class="card">
+      <h2>方法与限制</h2>
+      <p>本报告默认采用“RSS 发现 URL + Jina Reader 正文抽取”的免费方案：使用 RSSHub 公共实例发现国内资讯源与平台热榜条目，并对部分素材进行正文抽取与分析。受限于免费源，点赞/播放等具体数值通常不可用；如需显示精确的点赞/观看数据，需对接平台官方 API 或授权账号。</p>
+    </section>
+  </div>
+  <script>
+    // 通过 data-pct 属性设置条形图宽度，避免在模板中直接使用带模板表达式的内联 CSS 值
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.bar-fill[data-pct]').forEach(function (el) {
+        var v = Number(el.getAttribute('data-pct'));
+        if (!isNaN(v)) {
+          el.style.width = v + '%';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

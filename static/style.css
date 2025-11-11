@@ -1,0 +1,37 @@
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; margin: 0; background: #f7f7f8; color: #222; }
+.container { max-width: 860px; margin: 40px auto; padding: 0 16px; }
+h1 { margin: 0 0 16px; font-size: 28px; }
+.desc { color: #555; margin-bottom: 20px; }
+.card { background: #fff; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+label { display: block; margin-bottom: 8px; }
+input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+button { margin-top: 12px; padding: 10px 16px; border: none; border-radius: 8px; background: #3b82f6; color: #fff; font-size: 16px; cursor: pointer; }
+button:hover { background: #2563eb; }
+.tips { color: #666; font-size: 14px; }
+.back { display: inline-block; margin-bottom: 8px; color: #3b82f6; text-decoration: none; }
+.tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.tags li { background: #eef2ff; color: #1e3a8a; padding: 6px 10px; border-radius: 999px; }
+.tags .count { color: #64748b; margin-left: 4px; }
+.item { padding: 8px 0; }
+.item-title { font-weight: 600; margin-bottom: 4px; }
+.item-meta { color: #666; font-size: 13px; margin-bottom: 6px; }
+.item-summary { color: #333; }
+
+/* 顶部KPI与图表样式 */
+.kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0 8px; }
+.kpi-card { background: #0a2540; color: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.kpi-card .kpi-title { font-size: 14px; opacity: 0.9; }
+.kpi-card .kpi-value { font-size: 28px; font-weight: 700; margin-top: 6px; }
+.subtitle { margin-top: 8px; font-size: 16px; color: #555; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.chart-placeholder { height: 160px; background: #f5f7fa; border: 1px dashed #cbd5e0; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 13px; }
+
+.bar-chart { display: flex; flex-direction: column; gap: 8px; }
+.bar { position: relative; height: 28px; background: #f5f7fa; border-radius: 6px; overflow: hidden; }
+.bar-label { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #333; }
+.bar-value { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #333; z-index: 2; }
+.bar-fill { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #3b82f6, #06b6d4); z-index: 1; }
+
+.quote { background: #fffbea; border: 1px solid #fde68a; border-radius: 6px; padding: 10px 12px; color: #92400e; font-size: 13px; }

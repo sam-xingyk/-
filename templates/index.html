@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>微舆 POC</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  </head>
+<body>
+  <div class="container">
+    <h1>微舆 POC</h1>
+    <p class="desc">输入一个分析主题，生成舆情报告（默认使用百度 AI 搜索；未配置时自动回退 RSS + Jina Reader）。</p>
+
+    <form id="analyze-form" action="/analyze" method="post" class="card">
+      <label for="topic">分析主题：</label>
+      <input type="text" id="topic" name="topic" placeholder="例如：小鹏、小鹏汽车、XPeng；或 校园品牌舆情、新能源汽车口碑" required />
+      <label style="display:block; margin-top:8px;">
+        <input type="checkbox" name="fast" /> 启用快速模式（更快生成，正文抽取与超时更谨慎）
+      </label>
+      <button id="submit-btn" type="submit">生成报告</button>
+    </form>
+
+    <div class="tips">
+      <p>说明：已设置“默认百度 AI 搜索”。请在 .env 填写 BAIDU_APPBUILDER_API_KEY 后即可使用每日约100次免费额度；若未配置则自动回退到“RSS 发现 URL + Jina Reader 正文抽取”。可勾选“快速模式”以更快生成。</p>
+    </div>
+  </div>
+  <script>
+    const form = document.getElementById('analyze-form');
+    const btn = document.getElementById('submit-btn');
+    form.addEventListener('submit', () => {
+      btn.disabled = true;
+      btn.textContent = '生成中…';
+    });
+  </script>
+</body>
+</html>
