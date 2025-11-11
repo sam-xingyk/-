@@ -125,12 +125,24 @@ class Orchestrator:
 
         # RSS 相关性评分的简单统计
         try:
-            rel_scores = [it.get("relevance", {}).get("score", 0.0) for it in items if it.get("relevance")]
-            rel_avg = round(sum(rel_scores) / len(rel_scores), 2) if rel_scores else None
+            rel_scores_raw = [it.get("relevance", {}).get("score", 0.0) for it in items if it.get("relevance")]
+            rel_avg = round(sum(rel_scores_raw) / len(rel_scores_raw), 2) if rel_scores_raw else None
+            # 归一化到 0-1 区间用于分布展示（假设分数 0-4 为常见范围）
+            rel_scores = [min(max(s / 4.0, 0.0), 1.0) for s in rel_scores_raw]
+            # 直方图分箱
+            bins_def = [(0.0, 0.2), (0.2, 0.4), (0.4, 0.6), (0.6, 0.8), (0.8, 1.01)]
+            bins = []
+            for lo, hi in bins_def:
+                cnt = sum(1 for s in rel_scores if (s >= lo and s < hi))
+                rng = f"{round(lo,1)}-{round(hi if hi<=1.0 else 1.0,1)}"
+                bins.append({"range": rng, "count": cnt})
+            hist_max = max([b["count"] for b in bins]) if bins else 1
             rel_reasons = [it.get("relevance", {}).get("reason", "") for it in items if it.get("relevance")][:5]
         except Exception:
             rel_avg = None
             rel_reasons = []
+            bins = []
+            hist_max = 1
 
         report["metrics"] = {
             "wiki_pageviews_zh": pv_zh,
@@ -185,6 +197,10 @@ class Orchestrator:
                 "overlaps": overlaps,
                 "rss_relevance_avg": rel_avg,
                 "rss_relevance_samples": rel_reasons,
+                "rss_relevance_hist": {
+                    "bins": bins,
+                    "max_count": hist_max,
+                },
             },
         }
 

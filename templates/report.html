@@ -44,6 +44,30 @@
     </ul>
 
     <section class="card">
+      <h2>导出报告</h2>
+      <div class="grid">
+        <div>
+          <form method="post" action="/export">
+            <input type="hidden" name="topic" value="{{ topic }}">
+            <input type="hidden" name="source" value="{{ source }}">
+            <input type="hidden" name="fast" value="{{ 'on' if fast else 'off' }}">
+            <input type="hidden" name="format" value="html">
+            <button type="submit" class="btn">导出为静态 HTML</button>
+          </form>
+        </div>
+        <div>
+          <form method="post" action="/export">
+            <input type="hidden" name="topic" value="{{ topic }}">
+            <input type="hidden" name="source" value="{{ source }}">
+            <input type="hidden" name="fast" value="{{ 'on' if fast else 'off' }}">
+            <input type="hidden" name="format" value="md">
+            <button type="submit" class="btn">导出为 Markdown</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
       <h2>数据指标</h2>
       <ul class="tags">
         <li>维基浏览量（近30天，中文）：{{ report.metrics.wiki_pageviews_zh if report.metrics.wiki_pageviews_zh is not none else 'N/A' }}</li>
@@ -260,6 +284,21 @@
     </section>
 
     <section class="card">
+      <h2>热点关键词云</h2>
+      {% if report.keywords %}
+      <div class="cloud" id="kw-cloud">
+        {% set maxc = (report.keywords | map(attribute='count') | max) if report.keywords else 1 %}
+        {% for kw in report.keywords %}
+          {% set weight = ((kw.count / maxc) * 100) | round(0) %}
+          <span class="cloud-item" data-weight="{{ weight }}">{{ kw.word }}</span>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="chart-placeholder">暂无关键词数据。</div>
+      {% endif %}
+    </section>
+
+    <section class="card">
       <h2>情感/倾向</h2>
       <p>
         积极：{{ report.sentiment.positive }}；
@@ -267,6 +306,21 @@
         分值：{{ report.sentiment.score }}；
         倾向：<strong>{{ report.sentiment.tendency }}</strong>
       </p>
+    </section>
+
+    <section class="card">
+      <h2>相关性评分分布</h2>
+      {% if report.metrics.analysis and report.metrics.analysis.rss_relevance_hist and report.metrics.analysis.rss_relevance_hist.bins %}
+      <div class="bar-chart">
+        {% set maxh = report.metrics.analysis.rss_relevance_hist.max_count %}
+        {% for b in report.metrics.analysis.rss_relevance_hist.bins %}
+          {% set pct = ((b.count / maxh) * 100) | round(0) %}
+          <div class="bar"><span class="bar-label">{{ b.range }}</span><span class="bar-value">{{ b.count }}</span><span class="bar-fill" data-pct="{{ pct }}"></span></div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="chart-placeholder">暂无评分分布数据。</div>
+      {% endif %}
     </section>
 
     <section class="card">
@@ -313,6 +367,15 @@
         if (!isNaN(v)) {
           el.style.width = v + '%';
         }
+      });
+      // 关键词云：根据 data-weight 设置字号范围 12px-28px
+      document.querySelectorAll('#kw-cloud .cloud-item').forEach(function (el) {
+        var w = Number(el.getAttribute('data-weight'));
+        if (isNaN(w)) w = 0;
+        var size = 12 + Math.round(w * (28 - 12) / 100);
+        el.style.fontSize = size + 'px';
+        el.style.marginRight = '8px';
+        el.style.lineHeight = '1.6';
       });
     });
   </script>
