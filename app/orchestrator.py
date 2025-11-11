@@ -136,7 +136,8 @@ class Orchestrator:
                 cnt = sum(1 for s in rel_scores if (s >= lo and s < hi))
                 rng = f"{round(lo,1)}-{round(hi if hi<=1.0 else 1.0,1)}"
                 bins.append({"range": rng, "count": cnt})
-            hist_max = max([b["count"] for b in bins]) if bins else 1
+            counts = [b["count"] for b in bins]
+            hist_max = max(counts) if counts and max(counts) > 0 else 1
             rel_reasons = [it.get("relevance", {}).get("reason", "") for it in items if it.get("relevance")][:5]
         except Exception:
             rel_avg = None
