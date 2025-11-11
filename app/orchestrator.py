@@ -5,6 +5,8 @@ from datetime import datetime
 from urllib.parse import urlparse
 from .providers.metrics import wiki_pageviews
 from .providers.trending import trending_presence
+from app.config import trend_platform_whitelist
+from app.utils.terms import normalize_text, expand_terms
 from .providers.meili import upsert_documents
 from collections import defaultdict
 
@@ -52,6 +54,7 @@ class Orchestrator:
         pv_zh = wiki_pageviews(topic, days=30, lang="zh")
         pv_en = wiki_pageviews(topic, days=30, lang="en")
         trend = trending_presence(topic)
+        wl = trend_platform_whitelist()
 
         # 追加报告元信息与KPI
         total_text_len = sum(
@@ -98,11 +101,43 @@ class Orchestrator:
         )
         platform_max = max(domain_counts.values()) if domain_counts else 1
 
+        # 交叉平台重合：对各平台热榜标题进行规范化，统计跨平台重复出现的热点
+        try:
+            norm_map = defaultdict(lambda: {"platforms": set(), "sample_title": ""})
+            for plat, data in trend.items():
+                items_list = data.get("matched_items", [])
+                for it in items_list:
+                    t = it.get("title", "")
+                    nt = normalize_text(t)
+                    if not nt:
+                        continue
+                    norm_map[nt]["platforms"].add(plat)
+                    if not norm_map[nt]["sample_title"]:
+                        norm_map[nt]["sample_title"] = t
+            overlaps = []
+            for nt, info in norm_map.items():
+                plats = sorted(list(info["platforms"]))
+                if len(plats) >= 2:
+                    overlaps.append({"title": info["sample_title"], "platforms": plats})
+            overlaps = sorted(overlaps, key=lambda x: len(x["platforms"]), reverse=True)[:8]
+        except Exception:
+            overlaps = []
+
+        # RSS 相关性评分的简单统计
+        try:
+            rel_scores = [it.get("relevance", {}).get("score", 0.0) for it in items if it.get("relevance")]
+            rel_avg = round(sum(rel_scores) / len(rel_scores), 2) if rel_scores else None
+            rel_reasons = [it.get("relevance", {}).get("reason", "") for it in items if it.get("relevance")][:5]
+        except Exception:
+            rel_avg = None
+            rel_reasons = []
+
         report["metrics"] = {
             "wiki_pageviews_zh": pv_zh,
             "wiki_pageviews_en": pv_en,
             "rss_mentions_count": len(items),
             "trending": trend,
+            "platform_whitelist": wl,
             # 顶部KPI使用的统计值
             "trending_counts": {
                 # 微博取聚合后的条数，避免仅在综合热榜出现时被误判未出现
@@ -133,6 +168,24 @@ class Orchestrator:
             # 代理指标：阅读与互动
             "reads_total_proxy": reads_total_proxy,
             "interactions_proxy": interactions_proxy,
+            # 数据分析增强
+            "analysis": {
+                "platform_coverage": {
+                    "present_count": sum(1 for p, c in {
+                        "weibo": len(weibo_items_agg),
+                        "zhihu": len(zhihu_items),
+                        "bilibili": len(bilibili_items),
+                        "sina": len(sina_items),
+                        "toutiao": len(toutiao_items),
+                        "douyin": len(douyin_items),
+                        "xiaohongshu": len(xhs_items),
+                    }.items() if c > 0),
+                    "total_whitelisted": len(wl or []),
+                },
+                "overlaps": overlaps,
+                "rss_relevance_avg": rel_avg,
+                "rss_relevance_samples": rel_reasons,
+            },
         }
 
         # 索引入库：便于后续高频检索

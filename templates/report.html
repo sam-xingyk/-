@@ -49,6 +49,14 @@
         <li>维基浏览量（近30天，中文）：{{ report.metrics.wiki_pageviews_zh if report.metrics.wiki_pageviews_zh is not none else 'N/A' }}</li>
         <li>维基浏览量（近30天，英文）：{{ report.metrics.wiki_pageviews_en if report.metrics.wiki_pageviews_en is not none else 'N/A' }}</li>
         <li>RSS 命中条数：{{ report.metrics.rss_mentions_count }}</li>
+        {% if report.metrics.platform_whitelist %}
+        <li>
+          平台白名单：
+          {% for plat in report.metrics.platform_whitelist %}
+            <span class="badge">{{ plat }}</span>
+          {% endfor %}
+        </li>
+        {% endif %}
         {% if report.metrics.platform_counts %}
         <li>
           平台素材命中：
@@ -147,6 +155,57 @@
           </div>
           {% endif %}
         </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>数据分析增强</h2>
+      <div class="grid">
+        <div>
+          <h3>平台覆盖情况</h3>
+          {% if report.metrics.analysis and report.metrics.analysis.platform_coverage %}
+          <p>
+            覆盖平台数：{{ report.metrics.analysis.platform_coverage.present_count }}/{{ report.metrics.analysis.platform_coverage.total_whitelisted }}；
+            热榜条目总计：{{ report.metrics.interactions_proxy }}
+          </p>
+          {% else %}
+          <p>暂无覆盖数据。</p>
+          {% endif %}
+        </div>
+        <div>
+          <h3>跨平台重合热点</h3>
+          {% if report.metrics.analysis and report.metrics.analysis.overlaps %}
+          <ul>
+            {% for ov in report.metrics.analysis.overlaps %}
+              <li>
+                <div class="item-title">{{ ov.title }}</div>
+                <div class="item-meta">出现平台：
+                  {% for p in ov.platforms %}
+                    <span class="badge">{{ p }}</span>
+                  {% endfor %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <div class="chart-placeholder">暂无跨平台重合热点。</div>
+          {% endif %}
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <h3>RSS 相关性统计</h3>
+        {% if report.metrics.analysis and report.metrics.analysis.rss_relevance_avg is not none %}
+        <p>平均相关性评分：{{ report.metrics.analysis.rss_relevance_avg }}</p>
+        {% else %}
+        <p>暂无相关性评分数据。</p>
+        {% endif %}
+        {% if report.metrics.analysis and report.metrics.analysis.rss_relevance_samples %}
+        <ul class="tags">
+          {% for r in report.metrics.analysis.rss_relevance_samples %}
+            <li>{{ r }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
       </div>
     </section>
 

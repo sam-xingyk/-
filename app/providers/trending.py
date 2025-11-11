@@ -5,6 +5,7 @@ import httpx
 import feedparser
 from app.utils.cache import TTLCache
 from app.utils.terms import expand_terms, normalize_text
+from app.config import trend_platform_whitelist
 
 _TREND_CACHE = TTLCache(ttl_seconds=300)
 
@@ -118,8 +119,12 @@ def trending_presence(query: str) -> Dict:
     """
     q = (query or "").strip().lower()
     terms = expand_terms(query)
+    # 仅处理白名单平台
+    whitelist = set(trend_platform_whitelist() or [])
     result = {}
     for platform, url in TREND_FEEDS.items():
+        if whitelist and platform not in whitelist:
+            continue
         entries = _fetch_entries(url)
         matched_titles: List[str] = []
         matched_items: List[Dict] = []
