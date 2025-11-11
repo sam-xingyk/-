@@ -314,7 +314,7 @@
       <div class="bar-chart">
         {% set maxh = report.metrics.analysis.rss_relevance_hist.max_count %}
         {% for b in report.metrics.analysis.rss_relevance_hist.bins %}
-          {% set pct = ((b.count / maxh) * 100) | round(0) %}
+          {% set pct = ((b.count / (maxh if maxh > 0 else 1)) * 100) | round(0) %}
           <div class="bar"><span class="bar-label">{{ b.range }}</span><span class="bar-value">{{ b.count }}</span><span class="bar-fill" data-pct="{{ pct }}"></span></div>
         {% endfor %}
       </div>
